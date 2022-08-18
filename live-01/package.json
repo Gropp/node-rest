@@ -1,0 +1,17 @@
+{
+  "name": "ms-autentication",
+  "version": "1.0.0",
+  "description": "Microservice para autenticacao de usuarios",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./",
+    "build": "tsc -p ."
+  },
+  "author": "Fernando Gropp",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.7.6",
+    "typescript": "^4.7.4"
+  }
+}
