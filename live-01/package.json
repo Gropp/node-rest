@@ -11,7 +11,11 @@
   "author": "Fernando Gropp",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/node": "^18.7.6",
     "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "express": "^4.18.1"
   }
 }
