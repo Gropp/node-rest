@@ -12,7 +12,7 @@ const PORT = 3000
 //ele vai retornar um JSON (foo)
 //com o TS podemos tipar os argumentos
 app.get('/status', (req: Request, res: Response, next: NextFunction) => {
-    res.status(200).send({foo: 'bar'});
+    res.status(200).send({foo: 'Servidor no AR!'});
 });
 
 //precisamos que o servidor fique monitarando as requisicoes em uma porta
