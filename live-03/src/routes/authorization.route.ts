@@ -34,7 +34,7 @@ authorizationRoute.post('/token', basicAutentication, async(req: Request, res: R
             throw new ForbiddenError('Usuário não informado');
         }
         //vamos criar um token para a nossa aplicacao para que a informacao entre o Microservico e os clientes tenham mais seguranca - confirmando os dois lados da aplicacao server-cliente
-        //informacoes que vao alimentar o JWT
+        //informacoes que vao alimentar o JWT - NO PAYLOAD QUE ESTAO AS INFORMACOES DO USUARIO!
         const jwtPayload = {username: user.username};
         const jwtOptions = {subject: user?.uuid};
         const secretKey = 'my_secret_key';

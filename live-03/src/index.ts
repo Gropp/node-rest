@@ -1,6 +1,7 @@
 //COMPONENTE PRINCIPAL - CHAMA TODOS OS OUTROS
 //o express é um gerenciador de rotas http
 import express from "express";
+import bearerAuthentication from "./middlewares/bearer-authentication-middleware";
 import errorHandler from "./middlewares/error-handler.middleware";
 import authorizationRoute from "./routes/authorization.route";
 import statusRoute from "./routes/status.route";
@@ -31,8 +32,9 @@ app.use(errorHandler);
 //TODO - CONFIGURACAO DAS ROTAS - MANDA A APLICACAO USAR AS ROTAS CRIADAS
 
 //manda esse componente utilizar a configuracao feita no usersRoute - que sao as rotas dos clientes
-app.use(usersRoute);
+//A AUTENTICACAO POR TOKEN - BEARER VAI SEU USADA POR TODOAS AS ROTAS DE USUARIO, ENTAO COLOCAMOS JUNTO A DECLARACAO DELE
 app.use(statusRoute);
+app.use(bearerAuthentication, usersRoute);
 app.use(authorizationRoute);
 
 
