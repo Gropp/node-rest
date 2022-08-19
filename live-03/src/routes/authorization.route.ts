@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction, Router } from "express";
-import ForbiddenError from "../models/forbidden.error.model";
-import userRepository from "../repositories/user.repository";
 import JWT from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
+import basicAutentication from "../middlewares/basic-authentication.middleware";
+import ForbiddenError from "../models/forbidden.error.model";
+
+//chama um middleware para autenticar o usuario e devolve para a aplicao um token jwt para manter a seguranca da conexao
 
 //componente para autenticar o usuario chamado pelo enndereco url /token
 //ele chama o repositorio de usuarios para autenticar a informacao
@@ -21,58 +23,23 @@ import { StatusCodes } from "http-status-codes";
 const authorizationRoute = Router();
 
 //como vai ter uma chamada ao banco de dados para validar usuario e passwd é necessario que esse metodo seja assincrono - pois dentro dele havera um await
-authorizationRoute.post('/token', async(req: Request, res: Response, next: NextFunction) => {
+//TODO - O MIDDLEWARE DE AUTENTICACAO BASIC É CHAMADO VIA PARAMETRO DA FUNCAO PRINCIPAL DESTE MODULO
+//ANTES DA FUNCAO ASSINCRONA ELE CHAMA O COMPONENTE AUTENTICADOR - NAO ESQUECER DE USAR O NEXT() NO FINAL DO MIDDLEWARE PARA QUE ELE SEJA EXECUTADO NESTA CHAMADA
+authorizationRoute.post('/token', basicAutentication, async(req: Request, res: Response, next: NextFunction) => {
 
     //tratamento de erro
     try {
-        //guardamos o valor da authorizacao
-        const authorizantionHeader = req.headers['authorization'];
-
-        //testamos para testar o token ou se for vazio
-        //se nao existir da erro
-        if(!authorizantionHeader){
-            throw new ForbiddenError('Credenciais não informadas - logar');
-        }
-
-        //caso tenha algum valor de autenticacao
-        //lembre que o headers nos traz esse formato: "tipo de autenticacao" "token"
-        //Basic FGA3r3s43TT4err
-        //precisamos pegar a informacao depois do espaco para isso usamos o metodo split
-        //desconstruindo a string
-        const [authorizantionType, token] = authorizantionHeader.split(' ');
-
-        //Testamos se o tipo de autenticacao é a esperada ou se o token esta vazio
-        if (authorizantionType !== 'Basic' || !token){
-            throw new ForbiddenError('Tipo de autenticacao invalida');
-        }
-
-        //o node tem um buffer para armazenar coisas importantes
-        //vamos atribuir ao buffer o token que esta em base64 e vamos converter para utf8 para obtermos o usuario e a senha que foram enviados e colocar em uma constante
-        const tokenContent = Buffer.from(token, 'base64').toString('utf-8');
-
-        //agora que temos a string do token decodificada, e sabemos que o padrao é user:passwd
-        //desconstruimos essa string usando o : como referencia
-        const [username, password] = tokenContent.split(':');
-
-        //testamos se as duas variaveis nao estao preenchidas
-        if(!username || !password) {
-            throw new ForbiddenError('Credenciais não preenchidas');
-        }
-
-        //existindo token e valores - chamamos o repositorio para ver se o usuario e a senha estao no BD e se estao corretos
-        const user = await userRepository.findByUsernameAndPassword(username, password);
-
-        //testa o retorno do repository
+        const user = req.user;
         if (!user) {
-            throw new ForbiddenError('Usuario ou senha INVALIDOS!');
+            throw new ForbiddenError('Usuário não informado');
         }
-
         //vamos criar um token para a nossa aplicacao para que a informacao entre o Microservico e os clientes tenham mais seguranca - confirmando os dois lados da aplicacao server-cliente
         //informacoes que vao alimentar o JWT
         const jwtPayload = {username: user.username};
         const jwtOptions = {subject: user?.uuid};
         const secretKey = 'my_secret_key';
 
+        //chama o JWT passando os parametros
         const jwt = JWT.sign(jwtPayload, secretKey, jwtOptions);
 
         //token gerado ele volta para o chamador
