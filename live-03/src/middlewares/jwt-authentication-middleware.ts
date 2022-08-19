@@ -3,7 +3,7 @@ import ForbiddenError from "../models/forbidden.error.model";
 import JWT from 'jsonwebtoken';
 import userRepository from "../repositories/user.repository";
 
-async function bearerAuthentication (req: Request, res: Response, next:NextFunction) {
+async function jwtAuthentication (req: Request, res: Response, next:NextFunction) {
 
     try {
         //guardamos o valor da authorizacao
@@ -49,4 +49,4 @@ async function bearerAuthentication (req: Request, res: Response, next:NextFunct
     }
 }
 
-export default bearerAuthentication;
+export default jwtAuthentication;
