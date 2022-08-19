@@ -10,5 +10,7 @@ CREATE TABLE IF NOT EXISTS api_user(
 );
 
 INSERT INTO api_user (username, password) 
-    VALUES ('Fernando', crypt('e3r4t5', 'chave'));
+    VALUES ('Fernando', crypt('!q1w2e3r4$', 'my_salt'),
+           ('Henrique', crypt('!q1w2e3r4$', 'my_salt'));
+
 

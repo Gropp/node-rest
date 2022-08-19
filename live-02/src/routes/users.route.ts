@@ -7,6 +7,7 @@ import { NextFunction, Request, Response, Router } from "express";
 //TUDO QUE SAI DA REQUISICAO SAO PELO RESPONSE - RES
 
 import { StatusCodes } from "http-status-codes";
+import userRepository from "../repositories/user.repository";
 //BIBLIOTECA COM AS CONSTANTES DOS CODIGOS HTTP
 
 //criando configuracoes de rotas sem estar amarrado na instancia de aplicacao
@@ -14,30 +15,39 @@ import { StatusCodes } from "http-status-codes";
 const usersRoute = Router();
 
 //ROTA PARA GET /USERS - LISTAR TODOS
-usersRoute.get('/users', (req: Request, res: Response, next: NextFunction) => {
-    const users = [{ userName: 'Fernando'}];
+//ACESSO AO BD É ASSINCRONO
+usersRoute.get('/users', async (req: Request, res: Response, next: NextFunction) => {
+    //COM BD POSTGRESQL
+    const users = await userRepository.findAllUsers();
+    
+    //TESTE SEM BD
+    //const users = [{ userName: 'Fernando'}];
     res.status(StatusCodes.OK).send(users);
 });
 
 //ROTA PARA GET /USERS/:UUID - LISTA CLIENTE ESPECIFICO
 //CONSEGUIMOS TIPIFICAR O TIPO DE DADO DO UUID
-usersRoute.get('/users/:uuid', (req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
+usersRoute.get('/users/:uuid', async(req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
     const uuid = req.params.uuid;
     //aqui voce coloca o banco de dados e faz um select nos users usando o uuid como where
-    res.status(StatusCodes.OK).send({uuid});
+    const user = await userRepository.findById(uuid);
+    //com o banco vc retorna o user
+    res.status(StatusCodes.OK).send(user);
+    //res.status(StatusCodes.OK).send({uuid});
 });
 
 //ROTA PARA POST /USERS - INCLUI UM NOVO CLIENTE
-usersRoute.post('/users', (req: Request, res: Response, next: NextFunction) => {
+usersRoute.post('/users', async (req: Request, res: Response, next: NextFunction) => {
     //o body é um objeto - para receber o json é preciso configurar no index.ts
     const newUser = req.body;
     //aqui voce coloca o banco de dados e faz um select nos users usando o uuid como where
+    const uuid = await userRepository.create(newUser);
     res.status(StatusCodes.CREATED).send(newUser);
 });
 
 //ROTA PARA PUT /USERS/:UUID - ALTERA UM CLIENTE ESPECIFICO
 //CONSEGUIMOS TIPIFICAR O TIPO DE DADO DO UUID
-usersRoute.put('/users/:uuid', (req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
+usersRoute.put('/users/:uuid', async (req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
     //captura o id
     const uuid = req.params.uuid;
     //captura o nome do usuario deste ID
@@ -45,12 +55,15 @@ usersRoute.put('/users/:uuid', (req: Request<{ uuid: string }>, res: Response, n
     //no corpo seleciona o usuario ID
     modifiedUser.uuid = uuid;
     //aqui voce coloca o banco de dados e faz um select nos users usando o uuid como where
+    await userRepository.update(modifiedUser);
     res.status(StatusCodes.OK).send(modifiedUser);
 });
 
 //ROTA PARA DELETE /USERS/:UUID - DELETA UM CLIENTE ESPECIFICO
 //CONSEGUIMOS TIPIFICAR O TIPO DE DADO DO UUID
-usersRoute.delete('/users/:uuid', (req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
+usersRoute.delete('/users/:uuid', async(req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
+    const uuid = req.params.uuid;
+    await userRepository.remove(uuid);
     //como é um delete, nao tem resposta, é sucesso ou erro
     //como nao tem corpo de resposta, no delete a propriedade é sendStatus, e nao status como nos outros
     res.sendStatus(StatusCodes.OK);
