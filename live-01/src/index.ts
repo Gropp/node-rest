@@ -5,6 +5,11 @@ import usersRoute from "./routes/users.route";
 //instancia a biblioteca
 const app = express();
 
+//configura um middleware que é responsavel por interpretar os objetos que recebem json
+app.use(express.json());
+//configura a aplicao para entender diferentes tipos de url
+app.use(express.urlencoded({extended: true}));
+
 //manda esse componente utilizar a configuracao feita no usersRoute - que sao as rotas dos clientes
 app.use(usersRoute);
 

@@ -27,4 +27,13 @@ usersRoute.get('/users/:uuid', (req: Request<{ uuid: string }>, res: Response, n
     res.status(StatusCodes.OK).send({uuid});
 });
 
+//ROTA PARA POST /USERS - INCLUI UM NOVO CLIENTE ESPECIFICO
+//CONSEGUIMOS TIPIFICAR O TIPO DE DADO DO UUID
+usersRoute.post('/users', (req: Request, res: Response, next: NextFunction) => {
+    //o body é um objeto - para receber o json é preciso configurar no index.ts
+    const newUser = req.body;
+    //aqui voce coloca o banco de dados e faz um select nos users usando o uuid como where
+    res.status(StatusCodes.CREATED).send(newUser);
+});
+
 export default usersRoute;
