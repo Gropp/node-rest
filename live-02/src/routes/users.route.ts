@@ -7,6 +7,7 @@ import { NextFunction, Request, Response, Router } from "express";
 //TUDO QUE SAI DA REQUISICAO SAO PELO RESPONSE - RES
 
 import { StatusCodes } from "http-status-codes";
+import DatabaseError  from "../models/database.error.model";
 import userRepository from "../repositories/user.repository";
 //BIBLIOTECA COM AS CONSTANTES DOS CODIGOS HTTP
 
@@ -28,12 +29,18 @@ usersRoute.get('/users', async (req: Request, res: Response, next: NextFunction)
 //ROTA PARA GET /USERS/:UUID - LISTA CLIENTE ESPECIFICO
 //CONSEGUIMOS TIPIFICAR O TIPO DE DADO DO UUID
 usersRoute.get('/users/:uuid', async(req: Request<{ uuid: string }>, res: Response, next: NextFunction) => {
-    const uuid = req.params.uuid;
-    //aqui voce coloca o banco de dados e faz um select nos users usando o uuid como where
-    const user = await userRepository.findById(uuid);
-    //com o banco vc retorna o user
-    res.status(StatusCodes.OK).send(user);
-    //res.status(StatusCodes.OK).send({uuid});
+    // na aplicacao que recebe o throw se trata o erro
+    try {
+        const uuid = req.params.uuid;
+        //aqui voce coloca o banco de dados e faz um select nos users usando o uuid como where
+        const user = await userRepository.findById(uuid);
+        //com o banco vc retorna o user
+        res.status(StatusCodes.OK).send(user);
+        //res.status(StatusCodes.OK).send({uuid});
+    } catch (error) {
+        //a next function como definido do index é o middleware error-handler
+        next(error);
+    }
 });
 
 //ROTA PARA POST /USERS - INCLUI UM NOVO CLIENTE

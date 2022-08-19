@@ -1,5 +1,6 @@
 import User from "../models/user.model";
 import db from "../db.postgresql";
+import DatabaseError from "../models/database.error.model";
 
 class userRepository {
 
@@ -23,25 +24,37 @@ class userRepository {
 
     //SELECT BY ID
     async findById(uuid: string): Promise<User> {
-        // com $ passa o parametro de maneira oculta, sem expor
-        const query = `
-            SELECT uuid, username
-            FROM api_user
-            WHERE uuid = $1
-        `;
+        //para tratar erros precisamos 
+        try {
+            // com $ passa o parametro de maneira oculta, sem expor
+            const query = `
+                SELECT uuid, username
+                FROM api_user
+                WHERE uuid = $1
+            `;
 
-        //como ser um filtro por id, o parametro é o uuid
-        const values = [uuid];
+            //como ser um filtro por id, o parametro é o uuid
+            const values = [uuid];
 
-        //como tem where, é preciso passar parametros para a query - o $1 no caso
-        const { rows } = await db.query<User>(query, values);
+            //como tem where, é preciso passar parametros para a query - o $1 no caso
+            const { rows } = await db.query<User>(query, values);
 
-        //descontruimos o array de resposta para pegar o usuario na posicao 0
-        //ja que neste caso como o uuid é unico vira com certeza um unico registro
-        //const user = rows[0]
-        const [ user ] = rows; 
+            //descontruimos o array de resposta para pegar o usuario na posicao 0
+            //ja que neste caso como o uuid é unico vira com certeza um unico registro
+            //const user = rows[0]
+            const [ user ] = rows; 
 
-        return user;
+            return user;
+
+        } catch (error) {
+            //vamos receber o erro em uma instancia
+            //trata-lo e nao deixar a app cair
+            //esse erro é tratado na aplicacao - na chamada da rota
+            throw new DatabaseError('Erro na consulta por ID', error);
+        } finally {
+            //se tudo der certo faz um commit no BD
+            db.query('commit')
+        }
     }
 
     //INSERIR USUARIOS
