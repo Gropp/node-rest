@@ -1,6 +1,7 @@
 //o express é um gerenciador de rotas http
 import express, { Request, Response, NextFunction} from "express";
 import errorHandler from "./middlewares/error-handler.middleware";
+import authorizationRoute from "./routes/authorization.route";
 import statusRoute from "./routes/status.route";
 import usersRoute from "./routes/users.route";
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({extended: true}));
 //manda esse componente utilizar a configuracao feita no usersRoute - que sao as rotas dos clientes
 app.use(usersRoute);
 app.use(statusRoute);
+app.use(authorizationRoute);
 
 //CONFIGURANDO A MANIPULACAO DE ERROS
 //agora a aplicacao conhece esse componente

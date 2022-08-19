@@ -1,6 +1,7 @@
 import User from "../models/user.model";
 import db from "../db.postgresql";
 import DatabaseError from "../models/database.error.model";
+import { brotliDecompress } from "zlib";
 
 class userRepository {
 
@@ -53,7 +54,35 @@ class userRepository {
             throw new DatabaseError('Erro na consulta por ID', error);
         } finally {
             //se tudo der certo faz um commit no BD
-            db.query('commit')
+            db.query('commit');
+        }
+    }
+
+    //SELECIONAR PARA VALIDACAO USUARIO E SENHA DO BD
+    async findByUsernameAndPassword(username: string, password: string): Promise<User | null> {
+        try {
+            //para testar a senha na aplicacao vc pode usa-la como parametro de filtro do where, se nao coincidir, nao vem nada no select
+            const query = `
+            SELECT uuid, username
+            FROM api_user
+            WHERE username = $1
+            AND password = crypt($2, 'my_salt')
+            `;
+
+            //parametros da query $1 e $2
+            const values = [username, password];
+
+            const { rows } = await db.query<User>(query, values);
+
+            //como usuario e senha sao unicos por usuario, o resultado sera um só registro/linha
+            const [user] = rows;
+
+            //ternario, se usuario estiver vazio retorna vazio, senao retorna o usuario
+            //return !user ? null : user;
+            return user || null;
+
+        } catch (error) {
+            throw new DatabaseError('Erro na consulta de username e password', error);
         }
     }
 

@@ -4,6 +4,7 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import DatabaseError from "../models/database.error.model";
+import ForbiddenError from "../models/forbidden.error.model";
 
 
 function errorHandler(error: any, req: Request, res: Response, next: NextFunction) {
@@ -12,6 +13,9 @@ function errorHandler(error: any, req: Request, res: Response, next: NextFunctio
     if (error instanceof DatabaseError) {
         //sendo erro da aplicacao ou do user (pois o id errado)
         res.sendStatus(StatusCodes.BAD_REQUEST);
+    } else if (error instanceof ForbiddenError) {
+        //sendo erro de autenticacao
+        res.sendStatus(StatusCodes.FORBIDDEN);
     } else {
         //sendo um erro do meio (caiu o servidor)
         res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);

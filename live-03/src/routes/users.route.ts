@@ -7,7 +7,6 @@ import { NextFunction, Request, Response, Router } from "express";
 //TUDO QUE SAI DA REQUISICAO SAO PELO RESPONSE - RES
 
 import { StatusCodes } from "http-status-codes";
-import DatabaseError  from "../models/database.error.model";
 import userRepository from "../repositories/user.repository";
 //BIBLIOTECA COM AS CONSTANTES DOS CODIGOS HTTP
 
@@ -18,6 +17,10 @@ const usersRoute = Router();
 //ROTA PARA GET /USERS - LISTAR TODOS
 //ACESSO AO BD É ASSINCRONO
 usersRoute.get('/users', async (req: Request, res: Response, next: NextFunction) => {
+
+    //VAMOS LISTAR OS HEADERS DO HTTP PARA VER A AUTENTICACAO
+    console.log(req.headers['authorization']);
+
     //COM BD POSTGRESQL
     const users = await userRepository.findAllUsers();
     
